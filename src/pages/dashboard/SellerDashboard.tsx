@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { CheckCircle2 } from 'lucide-react';
 import DashboardShell from './DashboardShell';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -24,6 +25,7 @@ const emptyForm = {
 };
 
 export default function SellerDashboard() {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
@@ -31,12 +33,21 @@ export default function SellerDashboard() {
   const [error, setError] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createNotice, setCreateNotice] = useState('');
 
   useEffect(() => {
     getCategories().then(setCategories).catch(() => setError('Create a category first or ask admin to add one.'));
     getMySellerProducts().then(setProducts).catch(() => setError('Unable to load your products.'));
     getDashboard('seller').then(setDashboard).catch(() => undefined);
   }, []);
+
+  useEffect(() => {
+    if (!createNotice) return undefined;
+
+    const timeoutId = window.setTimeout(() => setCreateNotice(''), 3200);
+    return () => window.clearTimeout(timeoutId);
+  }, [createNotice]);
 
   const updateField = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -50,6 +61,7 @@ export default function SellerDashboard() {
     event.preventDefault();
     setMessage('');
     setError('');
+    setIsCreating(true);
 
     try {
       const images = imageFile ? [await uploadProductImage(imageFile)] : [];
@@ -61,10 +73,16 @@ export default function SellerDashboard() {
       });
       setProducts((current) => [product, ...current]);
       setMessage('Product created successfully.');
+      setCreateNotice(`${product.name} was added to your catalog.`);
       setForm(emptyForm);
       setImageFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Unable to create product.');
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -88,6 +106,18 @@ export default function SellerDashboard() {
       description="Track your listed products and customer review activity."
       visibleStats={['products', 'reviews']}
     >
+      {createNotice && (
+        <div className="seller-success-popup" role="status" aria-live="polite">
+          <span className="seller-success-icon">
+            <CheckCircle2 size={28} />
+          </span>
+          <div>
+            <strong>Product created</strong>
+            <p>{createNotice}</p>
+          </div>
+        </div>
+      )}
+
       <section className="dashboard-panel">
         <div>
           <p className="eyebrow">Analytics</p>
@@ -188,18 +218,36 @@ export default function SellerDashboard() {
         {message && <div className="success">{message}</div>}
         {error && <div className="alert">{error}</div>}
         <form className="product-form" onSubmit={handleSubmit}>
-          <Input id="name" name="name" label="Product name" value={form.name} onChange={updateField} required />
-          <Input id="brand" name="brand" label="Brand" value={form.brand} onChange={updateField} />
-          <Input id="price" name="price" label="Price" type="number" min="0" value={form.price} onChange={updateField} required />
-          <Input id="quantity" name="quantity" label="Stock quantity" type="number" min="0" value={form.quantity} onChange={updateField} required />
-          <Input id="sku" name="sku" label="SKU" value={form.sku} onChange={updateField} />
+          <Input id="name" name="name" label="Product name" value={form.name} onChange={updateField} disabled={isCreating} required />
+          <Input id="brand" name="brand" label="Brand" value={form.brand} onChange={updateField} disabled={isCreating} />
+          <Input id="price" name="price" label="Price" type="number" min="0" value={form.price} onChange={updateField} disabled={isCreating} required />
+          <Input
+            id="quantity"
+            name="quantity"
+            label="Stock quantity"
+            type="number"
+            min="0"
+            value={form.quantity}
+            onChange={updateField}
+            disabled={isCreating}
+            required
+          />
+          <Input id="sku" name="sku" label="SKU" value={form.sku} onChange={updateField} disabled={isCreating} />
           <label className="field" htmlFor="productImage">
             <span>Product image</span>
-            <input className="file-input" id="productImage" type="file" accept="image/*" onChange={(event) => setImageFile(event.target.files?.[0] || null)} />
+            <input
+              ref={fileInputRef}
+              className="file-input"
+              id="productImage"
+              type="file"
+              accept="image/*"
+              disabled={isCreating}
+              onChange={(event) => setImageFile(event.target.files?.[0] || null)}
+            />
           </label>
           <label className="field" htmlFor="category">
             <span>Category</span>
-            <select id="category" name="category" value={form.category} onChange={updateField} required>
+            <select id="category" name="category" value={form.category} onChange={updateField} disabled={isCreating} required>
               <option value="">Select category</option>
               {categories.map((category) => (
                 <option key={category._id} value={category._id}>
@@ -210,9 +258,11 @@ export default function SellerDashboard() {
           </label>
           <label className="field product-description-field" htmlFor="description">
             <span>Description</span>
-            <textarea id="description" name="description" value={form.description} onChange={updateField} required />
+            <textarea id="description" name="description" value={form.description} onChange={updateField} disabled={isCreating} required />
           </label>
-          <Button>Create product</Button>
+          <Button loading={isCreating} loadingText="Creating product..." disabled={isCreating}>
+            Create product
+          </Button>
         </form>
       </section>
 

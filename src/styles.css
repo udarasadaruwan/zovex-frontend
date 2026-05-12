@@ -189,6 +189,50 @@ main {
   color: var(--brand);
 }
 
+.seller-success-popup {
+  position: fixed;
+  top: 92px;
+  right: clamp(18px, 4vw, 58px);
+  z-index: 110;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: min(380px, calc(100% - 36px));
+  padding: 15px 16px;
+  border: 1px solid #bfe4dd;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.16);
+  animation: seller-success-in 320ms ease both;
+}
+
+.seller-success-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: #e7f5f2;
+  color: var(--accent);
+  animation: seller-success-check 520ms ease 90ms both;
+}
+
+.seller-success-popup strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ink);
+}
+
+.seller-success-popup p {
+  overflow: hidden;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @keyframes cart-confirmation-in {
   from {
     opacity: 0;
@@ -198,6 +242,30 @@ main {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes seller-success-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes seller-success-check {
+  from {
+    opacity: 0;
+    transform: scale(0.65) rotate(-8deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
   }
 }
 
@@ -214,6 +282,7 @@ main {
   align-items: center;
   justify-content: center;
   gap: 9px;
+  position: relative;
   min-height: 42px;
   padding: 0 16px;
   border: 1px solid transparent;
@@ -226,8 +295,25 @@ main {
     border-color 150ms ease;
 }
 
-.btn:hover {
+.btn:hover:not(:disabled):not(.is-loading) {
   transform: translateY(-1px);
+}
+
+.btn:disabled,
+.btn.is-loading,
+.btn[aria-disabled="true"] {
+  cursor: wait;
+  opacity: 0.86;
+}
+
+.btn-spinner {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  animation: spin 760ms linear infinite;
 }
 
 .btn-primary {
@@ -235,7 +321,7 @@ main {
   color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled):not(.is-loading) {
   background: var(--brand-dark);
 }
 
@@ -262,7 +348,7 @@ main {
   font-weight: 650;
 }
 
-.google-btn:hover {
+.google-btn:hover:not(.is-loading) {
   background: #ffffff;
   border-color: #cfd6e2;
   box-shadow: 0 1px 3px rgba(60, 64, 67, 0.18);
@@ -767,6 +853,61 @@ main {
   padding: 56px 0;
 }
 
+.auth-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(245, 247, 250, 0.76);
+  backdrop-filter: blur(8px);
+  animation: auth-overlay-in 180ms ease both;
+}
+
+.auth-loading-card {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  width: min(340px, 100%);
+  padding: 28px;
+  border: 1px solid #bfe4dd;
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.16);
+  text-align: center;
+  animation: auth-card-in 240ms ease both;
+}
+
+.auth-loading-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  background: #e7f5f2;
+  color: var(--accent);
+}
+
+.auth-loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #dbeafe;
+  border-top-color: var(--brand);
+  border-radius: 999px;
+  animation: spin 820ms linear infinite;
+}
+
+.auth-loading-card strong {
+  font-size: 1.1rem;
+}
+
+.auth-loading-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .checkout-shell {
   align-items: start;
 }
@@ -851,6 +992,34 @@ main {
   }
 }
 
+@keyframes auth-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes auth-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .auth-card {
   display: grid;
   gap: 16px;
@@ -885,6 +1054,14 @@ main {
 .field textarea:focus {
   border-color: var(--brand);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.field input:disabled,
+.field select:disabled,
+.field textarea:disabled {
+  cursor: wait;
+  background: #f8fafc;
+  color: var(--muted);
 }
 
 .field textarea {
@@ -1452,6 +1629,13 @@ main {
     width: auto;
   }
 
+  .seller-success-popup {
+    top: 86px;
+    right: 18px;
+    left: 18px;
+    width: auto;
+  }
+
   .hero {
     padding-top: 42px;
   }
@@ -1531,7 +1715,13 @@ main {
 @media (prefers-reduced-motion: reduce) {
   .nav-menu,
   .nav-toggle,
-  .cart-confirmation {
+  .cart-confirmation,
+  .seller-success-popup,
+  .seller-success-icon,
+  .btn-spinner,
+  .auth-loading-overlay,
+  .auth-loading-card,
+  .auth-loading-spinner {
     animation: none;
     transition: none;
   }
