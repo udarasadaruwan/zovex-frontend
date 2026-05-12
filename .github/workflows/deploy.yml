@@ -28,6 +28,9 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
+      - name: Prepare GitHub Pages files
+        run: touch dist/.nojekyll
+
       - name: Configure git author
         run: |
           git config --global user.name "github-actions[bot]"
