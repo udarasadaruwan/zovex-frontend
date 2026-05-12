@@ -3,7 +3,8 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import ProductList from "./ProductList";
 import Button from "../components/ui/Button";
-import heroImage from "../assets/zovex-home-image.svg";
+
+const heroImage = `${import.meta.env.BASE_URL}Hero.png`;
 
 export default function Home() {
   return (
@@ -28,7 +29,7 @@ export default function Home() {
           </div>
         </div>
         <div className="hero-media" aria-label="Zovex marketplace preview">
-          <img src="/public/Hero.png" alt="Zovex shopping interface preview" />
+          <img src={heroImage} alt="Zovex shopping interface preview" />
         </div>
       </section>
 
