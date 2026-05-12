@@ -1,0 +1,249 @@
+import React, { useEffect, useState } from 'react';
+import DashboardShell from './DashboardShell';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import { getCategories } from '../../services/categoryService';
+import { getDashboard } from '../../services/dashboardService';
+import { createProduct, deleteProduct, getMySellerProducts, uploadProductImage } from '../../services/productService';
+import type { Category, DashboardData, Order, Product, Review } from '../../types';
+
+const formatMoney = (value = 0) => `$${value.toFixed(2)}`;
+const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateString() : 'Recent');
+const itemCount = (order: Order) => order.items?.reduce((total, item) => total + item.quantity, 0) || 0;
+const reviewProductName = (review: Review) =>
+  typeof review.product === 'string' ? 'Product' : review.product?.name || 'Product';
+
+const emptyForm = {
+  name: '',
+  description: '',
+  brand: '',
+  price: '',
+  category: '',
+  quantity: '',
+  sku: ''
+};
+
+export default function SellerDashboard() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [form, setForm] = useState(emptyForm);
+
+  useEffect(() => {
+    getCategories().then(setCategories).catch(() => setError('Create a category first or ask admin to add one.'));
+    getMySellerProducts().then(setProducts).catch(() => setError('Unable to load your products.'));
+    getDashboard('seller').then(setDashboard).catch(() => undefined);
+  }, []);
+
+  const updateField = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = event.target;
+    setForm((current) => ({
+      ...current,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setMessage('');
+    setError('');
+
+    try {
+      const images = imageFile ? [await uploadProductImage(imageFile)] : [];
+      const product = await createProduct({
+        ...form,
+        price: Number(form.price),
+        quantity: Number(form.quantity),
+        images
+      });
+      setProducts((current) => [product, ...current]);
+      setMessage('Product created successfully.');
+      setForm(emptyForm);
+      setImageFile(null);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Unable to create product.');
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    setMessage('');
+    setError('');
+
+    try {
+      await deleteProduct(productId);
+      setProducts((current) => current.filter((product) => product._id !== productId));
+      setMessage('Product removed.');
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Unable to remove product.');
+    }
+  };
+
+  return (
+    <DashboardShell
+      role="seller"
+      title="Seller workspace"
+      description="Track your listed products and customer review activity."
+      visibleStats={['products', 'reviews']}
+    >
+      <section className="dashboard-panel">
+        <div>
+          <p className="eyebrow">Analytics</p>
+          <h2>Seller performance</h2>
+        </div>
+        <div className="analytics-grid">
+          <article className="analytics-tile">
+            <span>Product revenue</span>
+            <strong>{formatMoney(dashboard?.analytics?.totalRevenue || 0)}</strong>
+          </article>
+          <article className="analytics-tile">
+            <span>Average rating</span>
+            <strong>{Number(dashboard?.analytics?.averageRating || 0).toFixed(1)}</strong>
+          </article>
+          <article className="analytics-tile">
+            <span>Low stock items</span>
+            <strong>{dashboard?.analytics?.lowStockItems || 0}</strong>
+          </article>
+        </div>
+      </section>
+
+      <section className="dashboard-split">
+        <div className="dashboard-panel">
+          <div>
+            <p className="eyebrow">Orders</p>
+            <h2>Recent product orders</h2>
+          </div>
+          <div className="table-list">
+            {dashboard?.recentOrders?.length ? (
+              dashboard.recentOrders.map((order) => (
+                <article className="insight-row" key={order._id}>
+                  <div>
+                    <strong>{order.user?.name || 'Customer'}</strong>
+                    <span>
+                      {itemCount(order)} item{itemCount(order) === 1 ? '' : 's'} - {formatDate(order.createdAt)}
+                    </span>
+                  </div>
+                  <mark className={`status-pill status-${order.status}`}>{order.status}</mark>
+                  <strong>{formatMoney(order.total)}</strong>
+                </article>
+              ))
+            ) : (
+              <p className="muted-text">No product orders yet.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="dashboard-panel">
+          <div>
+            <p className="eyebrow">Reviews</p>
+            <h2>Customer feedback</h2>
+          </div>
+          <div className="table-list">
+            {dashboard?.recentReviews?.length ? (
+              dashboard.recentReviews.map((review) => (
+                <article className="insight-row insight-row-stacked" key={review._id}>
+                  <div>
+                    <strong>{review.user?.name || 'Customer'} rated {reviewProductName(review)}</strong>
+                    <span>{review.rating}/5 stars - {formatDate(review.createdAt)}</span>
+                    {review.comment && <p>{review.comment}</p>}
+                  </div>
+                </article>
+              ))
+            ) : (
+              <p className="muted-text">No reviews yet.</p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="dashboard-panel">
+        <div>
+          <p className="eyebrow">Catalog insights</p>
+          <h2>Best rated products</h2>
+        </div>
+        <div className="table-list">
+          {dashboard?.analytics?.topProducts?.length ? (
+            dashboard.analytics.topProducts.map((product) => (
+              <article className="insight-row" key={product._id}>
+                <div>
+                  <strong>{product.name}</strong>
+                  <span>{formatMoney(product.price)} - {product.ratingCount || 0} rating{(product.ratingCount || 0) === 1 ? '' : 's'}</span>
+                </div>
+                <strong>{Number(product.ratingAverage || 0).toFixed(1)}/5</strong>
+              </article>
+            ))
+          ) : (
+            <p className="muted-text">No rated products yet.</p>
+          )}
+        </div>
+      </section>
+
+      <section className="dashboard-panel">
+        <div>
+          <p className="eyebrow">Inventory</p>
+          <h2>Create product</h2>
+        </div>
+        {message && <div className="success">{message}</div>}
+        {error && <div className="alert">{error}</div>}
+        <form className="product-form" onSubmit={handleSubmit}>
+          <Input id="name" name="name" label="Product name" value={form.name} onChange={updateField} required />
+          <Input id="brand" name="brand" label="Brand" value={form.brand} onChange={updateField} />
+          <Input id="price" name="price" label="Price" type="number" min="0" value={form.price} onChange={updateField} required />
+          <Input id="quantity" name="quantity" label="Stock quantity" type="number" min="0" value={form.quantity} onChange={updateField} required />
+          <Input id="sku" name="sku" label="SKU" value={form.sku} onChange={updateField} />
+          <label className="field" htmlFor="productImage">
+            <span>Product image</span>
+            <input className="file-input" id="productImage" type="file" accept="image/*" onChange={(event) => setImageFile(event.target.files?.[0] || null)} />
+          </label>
+          <label className="field" htmlFor="category">
+            <span>Category</span>
+            <select id="category" name="category" value={form.category} onChange={updateField} required>
+              <option value="">Select category</option>
+              {categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field product-description-field" htmlFor="description">
+            <span>Description</span>
+            <textarea id="description" name="description" value={form.description} onChange={updateField} required />
+          </label>
+          <Button>Create product</Button>
+        </form>
+      </section>
+
+      <section className="dashboard-panel">
+        <div>
+          <p className="eyebrow">My catalog</p>
+          <h2>Created products</h2>
+        </div>
+        <div className="table-list">
+          {products.length === 0 ? (
+            <p className="muted-text">No products created yet.</p>
+          ) : (
+            products.map((product) => (
+              <article className="table-row product-row" key={product._id}>
+                <div className="product-row-media">
+                  {product.images?.[0]?.url ? <img src={product.images[0].url} alt={product.name} /> : <span>{product.name.charAt(0)}</span>}
+                </div>
+                <div>
+                  <strong>{product.name}</strong>
+                  <span>
+                    {product.category?.name || 'No category'} - ${product.price.toFixed(2)}
+                  </span>
+                </div>
+                <Button variant="ghost" onClick={() => handleDeleteProduct(product._id)}>
+                  Remove
+                </Button>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
+    </DashboardShell>
+  );
+}
