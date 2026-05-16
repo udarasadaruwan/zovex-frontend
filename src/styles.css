@@ -269,6 +269,18 @@ main {
   }
 }
 
+@keyframes surface-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .user-pill {
   display: inline-flex;
   align-items: center;
@@ -761,13 +773,25 @@ main {
 
 .cart-item {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr) auto auto;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
   align-items: center;
   gap: 18px;
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  animation: surface-in 260ms ease both;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease;
+}
+
+.cart-item:hover {
+  border-color: #c7d0dc;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
 }
 
 .cart-item img {
@@ -785,6 +809,12 @@ main {
 .cart-item p {
   margin: 0;
   color: var(--muted);
+}
+
+.cart-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .stepper {
@@ -806,6 +836,21 @@ main {
   background: transparent;
   color: var(--ink);
   cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.stepper button:hover,
+.icon-button:hover {
+  background: #eef4ff;
+  color: var(--brand);
+}
+
+.stepper button:active,
+.icon-button:active {
+  transform: scale(0.96);
 }
 
 .stepper span {
@@ -1653,6 +1698,8 @@ main {
 
   .cart-item {
     grid-template-columns: 78px 1fr;
+    align-items: start;
+    gap: 14px;
   }
 
   .cart-item img {
@@ -1660,9 +1707,10 @@ main {
     height: 78px;
   }
 
-  .stepper,
-  .icon-button {
+  .cart-item-actions {
     grid-column: 2;
+    justify-content: space-between;
+    width: 100%;
   }
 
   .auth-card {
@@ -1716,6 +1764,7 @@ main {
   .nav-menu,
   .nav-toggle,
   .cart-confirmation,
+  .cart-item,
   .seller-success-popup,
   .seller-success-icon,
   .btn-spinner,

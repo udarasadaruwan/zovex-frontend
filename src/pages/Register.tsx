@@ -41,7 +41,7 @@ export default function Register() {
     setIsSubmitting(true);
     try {
       await register(form);
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Registration failed.');
       setIsSubmitting(false);

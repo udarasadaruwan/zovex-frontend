@@ -30,7 +30,7 @@ export default function Login() {
     setIsSubmitting(true);
     try {
       await login(form);
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Sign in failed.');
       setIsSubmitting(false);

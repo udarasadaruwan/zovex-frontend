@@ -24,22 +24,24 @@ export default function Cart() {
         {items.map(({ product, quantity }) => (
           <article className="cart-item" key={product._id}>
             <img src={product.images?.[0]?.url} alt={product.name} />
-            <div>
+            <div className="cart-item-info">
               <h2>{product.name}</h2>
               <p>${product.price.toFixed(2)}</p>
             </div>
-            <div className="stepper">
-              <button aria-label="Decrease quantity" onClick={() => updateQuantity(product._id, quantity - 1)}>
-                <Minus size={15} />
-              </button>
-              <span>{quantity}</span>
-              <button aria-label="Increase quantity" onClick={() => updateQuantity(product._id, quantity + 1)}>
-                <Plus size={15} />
+            <div className="cart-item-actions">
+              <div className="stepper">
+                <button aria-label="Decrease quantity" onClick={() => updateQuantity(product._id, quantity - 1)}>
+                  <Minus size={15} />
+                </button>
+                <span>{quantity}</span>
+                <button aria-label="Increase quantity" onClick={() => updateQuantity(product._id, quantity + 1)}>
+                  <Plus size={15} />
+                </button>
+              </div>
+              <button className="icon-button" aria-label="Remove item" onClick={() => removeItem(product._id)}>
+                <Trash2 size={18} />
               </button>
             </div>
-            <button className="icon-button" aria-label="Remove item" onClick={() => removeItem(product._id)}>
-              <Trash2 size={18} />
-            </button>
           </article>
         ))}
       </div>
