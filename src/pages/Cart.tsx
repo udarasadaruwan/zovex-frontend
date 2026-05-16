@@ -40,6 +40,7 @@ export default function Cart() {
               </div>
               <button className="icon-button" aria-label="Remove item" onClick={() => removeItem(product._id)}>
                 <Trash2 size={18} />
+                <span>Remove</span>
               </button>
             </div>
           </article>

@@ -859,10 +859,17 @@ main {
 }
 
 .icon-button {
-  width: 40px;
+  gap: 7px;
+  min-width: 40px;
   height: 40px;
+  padding: 0 10px;
   border-radius: 8px;
   color: var(--danger);
+}
+
+.icon-button span {
+  display: none;
+  font-weight: 750;
 }
 
 .summary-box {
@@ -1709,8 +1716,22 @@ main {
 
   .cart-item-actions {
     grid-column: 2;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
+  }
+
+  .cart-item-actions .stepper {
+    flex: 1 1 auto;
+    max-width: 216px;
+  }
+
+  .cart-item-actions .icon-button {
+    flex: 0 0 auto;
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    border: 1px solid #f5c2bd;
+    background: #fff4f2;
   }
 
   .auth-card {
@@ -1757,6 +1778,18 @@ main {
 
   .footer-bottom {
     flex-direction: column;
+  }
+}
+
+@media (min-width: 420px) and (max-width: 640px) {
+  .cart-item-actions .icon-button {
+    width: auto;
+    min-width: 104px;
+    padding: 0 12px;
+  }
+
+  .cart-item-actions .icon-button span {
+    display: inline;
   }
 }
 
