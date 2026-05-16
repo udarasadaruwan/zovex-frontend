@@ -1,6 +1,7 @@
 import React from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import CartConfirmation from '../components/CartConfirmation';
+import { useAuth } from './AuthContext';
 import type { CartItem, Product } from '../types';
 
 interface CartContextValue {
@@ -14,7 +15,8 @@ interface CartContextValue {
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
-const STORAGE_KEY = 'zovex-cart';
+const LEGACY_STORAGE_KEY = 'zovex-cart';
+const GUEST_STORAGE_KEY = 'zovex-cart:guest';
 
 interface CartConfirmationState {
   id: number;
@@ -22,9 +24,9 @@ interface CartConfirmationState {
   quantity: number;
 }
 
-const readStoredCart = (): CartItem[] => {
+const readStoredCart = (storageKey: string): CartItem[] => {
   try {
-    const storedCart = localStorage.getItem(STORAGE_KEY);
+    const storedCart = localStorage.getItem(storageKey);
     return storedCart ? JSON.parse(storedCart) : [];
   } catch {
     return [];
@@ -32,7 +34,11 @@ const readStoredCart = (): CartItem[] => {
 };
 
 export function CartProvider({ children }: React.PropsWithChildren) {
-  const [items, setItems] = useState(readStoredCart);
+  const { loading: authLoading, user } = useAuth();
+  const userId = user?.id || user?._id || user?.email;
+  const storageKey = userId ? `zovex-cart:user:${userId}` : GUEST_STORAGE_KEY;
+  const [activeStorageKey, setActiveStorageKey] = useState(GUEST_STORAGE_KEY);
+  const [items, setItems] = useState(() => readStoredCart(GUEST_STORAGE_KEY));
   const [confirmation, setConfirmation] = useState<CartConfirmationState | null>(null);
 
   const closeConfirmation = useCallback(() => {
@@ -44,8 +50,22 @@ export function CartProvider({ children }: React.PropsWithChildren) {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items]);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+  }, []);
+
+  useEffect(() => {
+    if (authLoading || activeStorageKey === storageKey) return;
+
+    setActiveStorageKey(storageKey);
+    setItems(readStoredCart(storageKey));
+    setConfirmation(null);
+  }, [activeStorageKey, authLoading, storageKey]);
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    localStorage.setItem(activeStorageKey, JSON.stringify(items));
+  }, [activeStorageKey, authLoading, items]);
 
   const value = useMemo(() => {
     const subtotal = items.reduce((total, item) => total + item.product.price * item.quantity, 0);
