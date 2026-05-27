@@ -513,10 +513,118 @@ main {
   background: transparent;
 }
 
+.product-tools {
+  display: flex;
+  justify-content: flex-end;
+  width: min(340px, 100%);
+}
+
+.product-tools .search-box {
+  width: 100%;
+}
+
+.category-filter {
+  display: flex;
+  gap: 10px;
+  margin: -8px 0 18px;
+  padding-bottom: 4px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.category-filter button {
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-weight: 850;
+  text-transform: capitalize;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.category-filter button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(37, 99, 235, 0.35);
+  color: var(--brand);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.1);
+}
+
+.category-filter button.is-active {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: #ffffff;
+}
+
+.filter-summary {
+  margin: -6px 0 18px;
+  color: var(--muted);
+  font-weight: 750;
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination button {
+  min-width: 44px;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 850;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease,
+    opacity 150ms ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(37, 99, 235, 0.4);
+  color: var(--brand);
+}
+
+.pagination button.is-active {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: #ffffff;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
 }
 
 .product-card {
@@ -2209,6 +2317,27 @@ main {
 
   .cart-snapshot .btn,
   .dashboard-hero-actions .btn {
+    width: 100%;
+  }
+
+  .product-tools {
+    width: 100%;
+  }
+
+  .category-filter {
+    margin-top: -4px;
+  }
+
+  .pagination {
+    align-items: stretch;
+  }
+
+  .pagination > button {
+    flex: 1 1 130px;
+  }
+
+  .pagination-pages {
+    order: -1;
     width: 100%;
   }
 
