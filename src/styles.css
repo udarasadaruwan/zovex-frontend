@@ -1652,6 +1652,16 @@ main {
   gap: 8px;
 }
 
+.order-customer-name {
+  color: var(--text);
+  font-weight: 800;
+}
+
+.order-product-summary {
+  color: var(--brand);
+  font-weight: 850;
+}
+
 .order-status-control select {
   min-height: 38px;
   width: 100%;

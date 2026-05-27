@@ -14,6 +14,13 @@ const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateStri
 const itemCount = (order: Order) => order.items?.reduce((total, item) => total + item.quantity, 0) || 0;
 const reviewProductName = (review: Review) =>
   typeof review.product === 'string' ? 'Product' : review.product?.name || 'Product';
+const orderNumber = (orderId: string) => `#${orderId.slice(-6).toUpperCase()}`;
+const orderProductSummary = (order: Order) => {
+  const names = order.items?.map((item) => item.name || (typeof item.product === 'string' ? 'Product' : item.product.name)).filter(Boolean) || [];
+  if (names.length === 0) return 'Products not listed';
+  if (names.length <= 2) return names.join(', ');
+  return `${names.slice(0, 2).join(', ')} +${names.length - 2} more`;
+};
 const fulfillmentStatuses = ['paid', 'processing', 'shipped', 'delivered'];
 const statusChoicesFor = (status: string) => {
   const currentIndex = fulfillmentStatuses.indexOf(status);
@@ -191,7 +198,9 @@ export default function SellerDashboard() {
               dashboard.recentOrders.map((order) => (
                 <article className="insight-row seller-order-row" key={order._id}>
                   <div>
-                    <strong>{order.user?.name || 'Customer'}</strong>
+                    <strong>Order {orderNumber(order._id)}</strong>
+                    <span className="order-customer-name">{order.user?.name || 'Customer'}</span>
+                    <span className="order-product-summary">{orderProductSummary(order)}</span>
                     <span>
                       {itemCount(order)} item{itemCount(order) === 1 ? '' : 's'} - {formatDate(order.createdAt)}
                     </span>

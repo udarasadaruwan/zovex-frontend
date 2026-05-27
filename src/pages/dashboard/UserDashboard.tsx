@@ -20,13 +20,14 @@ const formatDate = (value?: string) =>
 
 const itemCount = (order: Order) => order.items?.reduce((total, item) => total + item.quantity, 0) || 0;
 const paidStatuses = new Set(['paid', 'processing', 'shipped', 'delivered']);
-const orderSteps = ['created', 'paid', 'processing', 'delivered'];
+const orderSteps = ['created', 'paid', 'processing', 'shipped', 'delivered'];
 
 const getProgressIndex = (status = '') => {
   const normalizedStatus = status.toLowerCase();
 
-  if (['delivered', 'completed'].includes(normalizedStatus)) return 3;
-  if (['processing', 'shipped'].includes(normalizedStatus)) return 2;
+  if (['delivered', 'completed'].includes(normalizedStatus)) return 4;
+  if (['shipped'].includes(normalizedStatus)) return 3;
+  if (['processing'].includes(normalizedStatus)) return 2;
   if (['paid'].includes(normalizedStatus)) return 1;
   return 0;
 };
