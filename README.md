@@ -45,6 +45,7 @@ Zovex is a role-based MERN ecommerce frontend built with React, TypeScript, and 
 - Product creation form with image upload
 - Product list management
 - Recent orders and reviews
+- Fulfillment status controls for seller product orders
 - Success feedback after product creation
 
 ### Admin Experience
@@ -170,7 +171,7 @@ This is required because the app is deployed under a GitHub Pages repository pat
 
 - `/dashboard` redirects users to the correct role dashboard.
 - `/dashboard/user` focuses on order progress, cart state, and profile readiness.
-- `/dashboard/seller` focuses on product creation, catalog, orders, and reviews.
+- `/dashboard/seller` focuses on product creation, catalog, orders, reviews, and fulfillment updates.
 - `/dashboard/admin` focuses on users, roles, categories, orders, reviews, and analytics.
 
 ## Scripts
@@ -195,6 +196,7 @@ This is required because the app is deployed under a GitHub Pages repository pat
 - Why GitHub Pages requires Vite `base` and SPA fallback handling.
 - How role-based dashboards are split without duplicating the entire layout.
 - How per-user cart storage prevents cross-account cart leakage in a shared browser.
+- How sellers can update fulfillment progress while backend ownership checks protect other sellers' orders.
 - How frontend feedback patterns improve trust during slow Render/free-tier requests.
 - How checkout avoids clearing the cart until Stripe payment is confirmed.
 

@@ -1642,6 +1642,62 @@ main {
   grid-template-columns: 1fr;
 }
 
+.seller-order-row {
+  grid-template-columns: minmax(0, 1fr) minmax(190px, auto) auto;
+}
+
+.order-status-control {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+}
+
+.order-status-control select {
+  min-height: 38px;
+  width: 100%;
+  min-width: 170px;
+  padding: 0 34px 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 800;
+  text-transform: capitalize;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease,
+    opacity 150ms ease;
+}
+
+.order-status-control select:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(37, 99, 235, 0.45);
+}
+
+.order-status-control select:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.order-status-control select:disabled {
+  cursor: wait;
+  opacity: 0.64;
+}
+
+.mini-saving {
+  color: var(--brand);
+  font-size: 0.78rem;
+  font-weight: 850;
+  animation: soft-pulse 900ms ease-in-out infinite;
+}
+
+.compact-notice {
+  margin-top: 2px;
+}
+
 .status-pill {
   justify-self: start;
   padding: 5px 9px;
@@ -2086,6 +2142,15 @@ main {
   .insight-row {
     grid-template-columns: 1fr;
     align-items: start;
+  }
+
+  .seller-order-row {
+    grid-template-columns: 1fr;
+  }
+
+  .order-status-control,
+  .order-status-control select {
+    width: 100%;
   }
 
   .cart-item {

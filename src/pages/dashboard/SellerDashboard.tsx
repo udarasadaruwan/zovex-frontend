@@ -5,6 +5,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { getCategories } from '../../services/categoryService';
 import { getDashboard } from '../../services/dashboardService';
+import { updateOrderStatus } from '../../services/orderService';
 import { createProduct, deleteProduct, getMySellerProducts, uploadProductImage } from '../../services/productService';
 import type { Category, DashboardData, Order, Product, Review } from '../../types';
 
@@ -13,6 +14,11 @@ const formatDate = (value?: string) => (value ? new Date(value).toLocaleDateStri
 const itemCount = (order: Order) => order.items?.reduce((total, item) => total + item.quantity, 0) || 0;
 const reviewProductName = (review: Review) =>
   typeof review.product === 'string' ? 'Product' : review.product?.name || 'Product';
+const fulfillmentStatuses = ['paid', 'processing', 'shipped', 'delivered'];
+const statusChoicesFor = (status: string) => {
+  const currentIndex = fulfillmentStatuses.indexOf(status);
+  return currentIndex >= 0 ? fulfillmentStatuses.slice(currentIndex) : fulfillmentStatuses;
+};
 
 const emptyForm = {
   name: '',
@@ -35,6 +41,8 @@ export default function SellerDashboard() {
   const [form, setForm] = useState(emptyForm);
   const [isCreating, setIsCreating] = useState(false);
   const [createNotice, setCreateNotice] = useState('');
+  const [statusNotice, setStatusNotice] = useState('');
+  const [updatingOrderId, setUpdatingOrderId] = useState('');
 
   useEffect(() => {
     getCategories().then(setCategories).catch(() => setError('Create a category first or ask admin to add one.'));
@@ -48,6 +56,13 @@ export default function SellerDashboard() {
     const timeoutId = window.setTimeout(() => setCreateNotice(''), 3200);
     return () => window.clearTimeout(timeoutId);
   }, [createNotice]);
+
+  useEffect(() => {
+    if (!statusNotice) return undefined;
+
+    const timeoutId = window.setTimeout(() => setStatusNotice(''), 3200);
+    return () => window.clearTimeout(timeoutId);
+  }, [statusNotice]);
 
   const updateField = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
@@ -96,6 +111,32 @@ export default function SellerDashboard() {
       setMessage('Product removed.');
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Unable to remove product.');
+    }
+  };
+
+  const handleOrderStatusChange = async (orderId: string, nextStatus: string) => {
+    setMessage('');
+    setError('');
+    setStatusNotice('');
+    setUpdatingOrderId(orderId);
+
+    try {
+      const updatedOrder = await updateOrderStatus(orderId, nextStatus);
+      setDashboard((current) =>
+        current
+          ? {
+              ...current,
+              recentOrders: current.recentOrders?.map((order) =>
+                order._id === orderId ? { ...order, status: updatedOrder.status } : order
+              )
+            }
+          : current
+      );
+      setStatusNotice(`Order #${orderId.slice(-6).toUpperCase()} moved to ${nextStatus}.`);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Unable to update order status.');
+    } finally {
+      setUpdatingOrderId('');
     }
   };
 
@@ -148,14 +189,30 @@ export default function SellerDashboard() {
           <div className="table-list">
             {dashboard?.recentOrders?.length ? (
               dashboard.recentOrders.map((order) => (
-                <article className="insight-row" key={order._id}>
+                <article className="insight-row seller-order-row" key={order._id}>
                   <div>
                     <strong>{order.user?.name || 'Customer'}</strong>
                     <span>
                       {itemCount(order)} item{itemCount(order) === 1 ? '' : 's'} - {formatDate(order.createdAt)}
                     </span>
                   </div>
-                  <mark className={`status-pill status-${order.status}`}>{order.status}</mark>
+                  <div className="order-status-control">
+                    <mark className={`status-pill status-${order.status}`}>{order.status}</mark>
+                    <select
+                      aria-label={`Update order ${order._id.slice(-6).toUpperCase()} status`}
+                      value={fulfillmentStatuses.includes(order.status) ? order.status : ''}
+                      disabled={updatingOrderId === order._id || order.status === 'pending' || order.status === 'cancelled'}
+                      onChange={(event) => handleOrderStatusChange(order._id, event.target.value)}
+                    >
+                      {!fulfillmentStatuses.includes(order.status) && <option value="">Waiting payment</option>}
+                      {statusChoicesFor(order.status).map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
+                    {updatingOrderId === order._id && <span className="mini-saving">Saving...</span>}
+                  </div>
                   <strong>{formatMoney(order.total)}</strong>
                 </article>
               ))
@@ -163,6 +220,7 @@ export default function SellerDashboard() {
               <p className="muted-text">No product orders yet.</p>
             )}
           </div>
+          {statusNotice && <div className="success compact-notice">{statusNotice}</div>}
         </div>
 
         <div className="dashboard-panel">

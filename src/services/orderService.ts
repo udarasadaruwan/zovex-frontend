@@ -42,3 +42,11 @@ export const getMyOrders = async () => {
   const data = await apiRequest<OrdersResponse>('/orders');
   return data.orders;
 };
+
+export const updateOrderStatus = async (orderId: string, status: string) => {
+  const data = await apiRequest<OrderResponse>(`/orders/${orderId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status })
+  });
+  return data.order;
+};
