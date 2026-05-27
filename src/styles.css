@@ -1506,27 +1506,95 @@ main {
 }
 
 .timeline-track {
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  align-items: start;
+  padding: 12px 0 0;
+}
+
+.timeline-track::before {
+  content: "";
+  position: absolute;
+  top: 25px;
+  right: 10%;
+  left: 10%;
+  height: 4px;
+  border-radius: 999px;
+  background: #d7e3ec;
 }
 
 .timeline-track span {
   position: relative;
-  min-height: 34px;
-  padding: 9px 10px;
-  border-radius: 999px;
-  background: var(--surface);
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-height: 58px;
+  padding: 0 4px;
+  background: transparent;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 850;
   text-align: center;
   text-transform: capitalize;
+  z-index: 1;
+}
+
+.timeline-track span::before {
+  content: "";
+  width: 26px;
+  height: 26px;
+  border: 4px solid #d7e3ec;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 0 0 5px #f0fbf9;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.timeline-track span::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.2);
+  opacity: 0;
 }
 
 .timeline-track span.is-active {
+  color: var(--brand);
+}
+
+.timeline-track span.is-active::before {
+  border-color: var(--brand);
   background: var(--brand);
-  color: #ffffff;
+  box-shadow:
+    0 0 0 5px #f0fbf9,
+    0 0 0 8px rgba(37, 99, 235, 0.08);
+  transform: scale(1.02);
+}
+
+.timeline-track span.is-active::after {
+  animation: milestone-blink 1.45s ease-in-out infinite;
+}
+
+@keyframes milestone-blink {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+
+  45% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
 }
 
 @keyframes soft-pulse {
@@ -2145,7 +2213,30 @@ main {
   }
 
   .timeline-track {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin-inline: -4px;
+  }
+
+  .timeline-track::before {
+    right: 9%;
+    left: 9%;
+  }
+
+  .timeline-track span {
+    font-size: 0.66rem;
+    line-height: 1.2;
+  }
+
+  .timeline-track span::before {
+    width: 22px;
+    height: 22px;
+    border-width: 3px;
+  }
+
+  .timeline-track span::after {
+    top: 2px;
+    width: 28px;
+    height: 28px;
   }
 
   .customer-order-row,
@@ -2263,7 +2354,10 @@ main {
   .btn-spinner,
   .auth-loading-overlay,
   .auth-loading-card,
-  .auth-loading-spinner {
+  .auth-loading-spinner,
+  .timeline-track span,
+  .timeline-track span::before,
+  .timeline-track span::after {
     animation: none;
     transition: none;
   }
