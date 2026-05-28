@@ -88,10 +88,10 @@ export function CartProvider({ children }: React.PropsWithChildren) {
   }, [activeStorageKey, authLoading, storageKey]);
 
   useEffect(() => {
-    if (authLoading) return;
+    if (authLoading || activeStorageKey !== storageKey) return;
 
     localStorage.setItem(activeStorageKey, JSON.stringify(items));
-  }, [activeStorageKey, authLoading, items]);
+  }, [activeStorageKey, authLoading, items, storageKey]);
 
   const value = useMemo(() => {
     const subtotal = items.reduce((total, item) => total + item.product.price * item.quantity, 0);
