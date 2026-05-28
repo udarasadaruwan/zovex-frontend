@@ -33,6 +33,22 @@ const readStoredCart = (storageKey: string): CartItem[] => {
   }
 };
 
+const mergeCartItems = (primaryItems: CartItem[], incomingItems: CartItem[]) => {
+  return incomingItems.reduce<CartItem[]>((mergedItems, incomingItem) => {
+    const existing = mergedItems.find((item) => item.product._id === incomingItem.product._id);
+
+    if (existing) {
+      return mergedItems.map((item) =>
+        item.product._id === incomingItem.product._id
+          ? { ...item, quantity: item.quantity + incomingItem.quantity }
+          : item
+      );
+    }
+
+    return [...mergedItems, incomingItem];
+  }, primaryItems);
+};
+
 export function CartProvider({ children }: React.PropsWithChildren) {
   const { loading: authLoading, user } = useAuth();
   const userId = user?.id || user?._id || user?.email;
@@ -56,8 +72,18 @@ export function CartProvider({ children }: React.PropsWithChildren) {
   useEffect(() => {
     if (authLoading || activeStorageKey === storageKey) return;
 
+    const nextItems =
+      activeStorageKey === GUEST_STORAGE_KEY && storageKey !== GUEST_STORAGE_KEY
+        ? mergeCartItems(readStoredCart(storageKey), readStoredCart(GUEST_STORAGE_KEY))
+        : readStoredCart(storageKey);
+
+    if (activeStorageKey === GUEST_STORAGE_KEY && storageKey !== GUEST_STORAGE_KEY) {
+      localStorage.setItem(storageKey, JSON.stringify(nextItems));
+      localStorage.removeItem(GUEST_STORAGE_KEY);
+    }
+
     setActiveStorageKey(storageKey);
-    setItems(readStoredCart(storageKey));
+    setItems(nextItems);
     setConfirmation(null);
   }, [activeStorageKey, authLoading, storageKey]);
 
