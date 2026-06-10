@@ -1,7 +1,7 @@
 import React from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { fetchMe, login as loginRequest, logout as logoutRequest, register as registerRequest } from '../services/authService';
-import { getStoredToken } from '../services/apiClient';
+import { clearStoredToken, getStoredToken } from '../services/apiClient';
 import type { User, UserRole } from '../types';
 
 interface LoginPayload {
@@ -35,7 +35,10 @@ export function AuthProvider({ children }: React.PropsWithChildren) {
 
     fetchMe()
       .then(setUser)
-      .catch(() => setUser(null))
+      .catch(() => {
+        clearStoredToken();
+        setUser(null);
+      })
       .finally(() => setLoading(false));
   }, []);
 

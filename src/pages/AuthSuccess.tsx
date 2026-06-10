@@ -2,7 +2,7 @@ import React from 'react';
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { setStoredToken } from '../services/apiClient';
+import { clearStoredToken, setStoredToken } from '../services/apiClient';
 import { fetchMe } from '../services/authService';
 
 export default function AuthSuccess() {
@@ -20,8 +20,15 @@ export default function AuthSuccess() {
 
     setStoredToken(token);
     fetchMe()
-      .then(setUser)
-      .finally(() => navigate('/', { replace: true }));
+      .then((user) => {
+        setUser(user);
+        navigate('/', { replace: true });
+      })
+      .catch(() => {
+        clearStoredToken();
+        setUser(null);
+        navigate('/login', { replace: true });
+      });
   }, [navigate, params, setUser]);
 
   return <div className="status-line page-offset">Finishing Google sign in...</div>;

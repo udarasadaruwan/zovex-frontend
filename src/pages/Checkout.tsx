@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { useAuth } from '../context/AuthContext';
@@ -10,7 +10,6 @@ import { createCheckoutSession, createOrder } from '../services/orderService';
 export default function Checkout() {
   const { isAuthenticated, user } = useAuth();
   const { items } = useCart();
-  const navigate = useNavigate();
   const [form, setForm] = useState({ phone: '', line1: '', city: '', postalCode: '', country: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,8 +62,7 @@ export default function Checkout() {
   }
 
   if (!items.length) {
-    navigate('/cart');
-    return null;
+    return <Navigate to="/cart" replace />;
   }
 
   return (
