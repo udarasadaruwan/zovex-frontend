@@ -12,10 +12,10 @@ Zovex is a role-based MERN ecommerce frontend built with React, TypeScript, and 
 | Deployment | GitHub Pages |
 | Main users | Customers, sellers, admins |
 
-## Live Links
+## 🔗 Live Links
 
-- Frontend: `https://udarasadaruwan.github.io/zovex-frontend/`
-- Backend API: `https://zovex-backend.onrender.com/api`
+- 🖥️ **Live Link:** [zovex live](https://udarasadaruwan.github.io/zovex-frontend/)
+- ⚙️ **Backend Repository:** [zovex Backend](https://github.com/udarasadaruwan/zovex-backend)
 
 ## What This Project Demonstrates
 
